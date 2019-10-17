@@ -1,0 +1,35 @@
+/* You can add global styles to this file, and also import other style files */
+$black: #22252a;
+$light-black: #2d3035;
+$text-black: #8a8d93;
+
+/* Provide sufficient contrast against white background */
+a {
+  color: #0366d6;
+}
+
+code {
+  color: #e01a76;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+@media only screen and (min-width : 1200px) {
+  .container { max-width: 1700px; }
+}
+
+html, body, .navbar {
+  background: $black !important;
+}
+
+h1, h2, h3, h4, h5, a {
+  color: $text-black !important;
+}
+
+.border-bottom {
+  border-bottom: 1px solid #34373d !important;
+}
