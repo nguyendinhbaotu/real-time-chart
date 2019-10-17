@@ -30,7 +30,7 @@ namespace RealTimeChart.Hubs
             }
         }
 
-        public async Task GetDataStartEnd(decimal startTime, decimal endTime, string key = null)
+        public async Task GetDataStartEnd(DateTime? startTime = null, DateTime? endTime = null, string key = null)
         {
             try
             {

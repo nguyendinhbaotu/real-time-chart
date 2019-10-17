@@ -18,7 +18,23 @@ export class ChartComponent implements OnInit, OnChanges {
   chartOptions: Highcharts.Options = {
     series: [{
       color: 'black',
-      type: 'spline'
+      type: 'area',
+      opacity: 0.5
+    },
+    {
+      color: 'black',
+      type: 'area',
+      opacity: 0.5
+    },
+    {
+      color: 'black',
+      type: 'area',
+      opacity: 0.5
+    },
+    {
+      color: 'black',
+      type: 'area',
+      opacity: 0.5
     }],
     chart: {
       zoomType: 'x',
@@ -67,11 +83,20 @@ export class ChartComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     const { key, title } = changes;
     if (key) {
+      // const s = {
+      //   color: this.colors[this.key] ? this.colors[this.key] : 'black',
+      //   type: this.types[this.key] ? this.types[this.key] : 'area',
+      // };
+
+      const s = (colorIdx: number) => {
+        return {
+          color: this.colors[colorIdx] ? this.colors[colorIdx] : 'black',
+          type: this.types[this.key] ? this.types[this.key] : 'area',
+          opacity: 0.5
+        };
+      };
       this.chartOptions = Object.assign({}, this.chartOptions, {
-        series: [{
-          color: this.colors[this.key] ? this.colors[this.key] : 'black',
-          type: this.types[this.key] ? this.types[this.key] : 'spline',
-        }]
+        series: [s(0), s(1), s(2), s(3)]
       });
     }
     if (title) {
@@ -84,7 +109,7 @@ export class ChartComponent implements OnInit, OnChanges {
   ngOnInit() {
     this.connection = new HubConnectionBuilder().withUrl('/real-time-data').build();
 
-    this.connection.on('OnChartDataUpdate', (data: [number, number], key: string) => {
+    this.connection.on('OnChartDataUpdate', (data: any, key: string) => {
       if (+key === +this.key) {
         this.chart.series[0].removePoint(0);
         this.chart.series[0].addPoint(data);
@@ -92,21 +117,25 @@ export class ChartComponent implements OnInit, OnChanges {
       }
     });
 
-    this.connection.on('OnInitDataSet', (data: [[number, number]], key: string) => {
+    this.connection.on('OnInitDataSet', (data: any, key: string) => {
       if (+key === +this.key) {
         this.generateChart(data);
         console.log(`Chart ${this.key} is inited.`);
       }
     });
 
-    this.connection.on('OnDataStartEnd', (data: [[number, number]], key: string) => {
+    this.connection.on('OnDataStartEnd', (data: any, key: string) => {
       if (+key === +this.key) {
         this.generateChart(data);
         console.log(`Chart ${this.key} is updated with time range.`);
       }
     });
 
-    this.connection.start().then(() => this.connection.invoke('GetInitData', this.key));
+    this.connection.start().then(() => this.connection.invoke('GetInitData', this.key)).catch(() => {
+      debugger
+      this.connection.start().then(() => this.connection.invoke('GetInitData', this.key));
+    });
+
 
     setTimeout(() => {
       const extremes = this.chart.xAxis[0].getExtremes();
@@ -124,12 +153,16 @@ export class ChartComponent implements OnInit, OnChanges {
   private afterSetExtremes(e) {
     if (e.trigger) {
       this.chart.showLoading('Loading data from server...');
-      this.connection.invoke('GetDataStartEnd', Math.round(e.min), Math.round(e.max), this.key);
+      this.connection.invoke('GetDataStartEnd', (new Date(e.min)).toJSON(), (new Date(e.max)).toJSON(), this.key);
     }
   }
 
-  private generateChart(data) {
-    this.chart.series[0].setData(data);
+  private generateChart(series: any[]) {
+    // this.chart.addSeries({
+    //   color: 'black',
+    //   type: 'area'
+    // });
+    series.forEach((s, idx) => this.chart.series[idx].setData(s));
     this.chart.hideLoading();
   }
 }

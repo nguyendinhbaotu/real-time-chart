@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RealTimeChart
 {
@@ -10,6 +11,11 @@ namespace RealTimeChart
         public ChartModel()
         {
             Series = new List<ChartEnty>();
+        }
+
+        public decimal[][][] ToArray()
+        {
+            return Series.Select(s => s.Records.Select(r => new decimal[] { new DateTimeOffset(r.Date).ToUnixTimeMilliseconds(), (decimal) r.Value }).ToArray()).ToArray();
         }
     }
 
